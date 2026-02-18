@@ -30,7 +30,8 @@
         <!-- 维护完成率图表 -->
         <div class="medical-card">
           <h3>各科室维护完成情况</h3>
-          <div class="chart-container" ref="deptChartRef"></div>
+          <div class="chart-container" ref="deptChartRef" v-show="hasDeptData"></div>
+          <el-empty v-show="!hasDeptData" description="暂无维护数据" :image-size="100" />
         </div>
       </div>
 
@@ -225,6 +226,9 @@ const faultPieRef = ref(null)
 let deptChart = null
 let faultPieChart = null
 
+// 数据状态
+const hasDeptData = ref(false)
+
 const formatDate = (date) => {
   if (!date) return '-'
   return new Date(date).toLocaleDateString('zh-CN')
@@ -276,7 +280,8 @@ const fetchStats = async () => {
     ])
 
     // 科室维护完成情况
-    if (maintenanceStats.byDepartment?.length) {
+    if (maintenanceStats.byDepartment?.length && maintenanceStats.byDepartment.some(d => d.total > 0)) {
+      hasDeptData.value = true
       deptChart = echarts.init(deptChartRef.value)
       deptChart.setOption({
         tooltip: { trigger: 'axis' },
@@ -301,6 +306,8 @@ const fetchStats = async () => {
           }
         ]
       })
+    } else {
+      hasDeptData.value = false
     }
 
     // 故障类型占比
