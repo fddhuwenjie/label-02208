@@ -362,40 +362,39 @@ const fetchTypeDeptDistribution = async () => {
         data: data.departments,
         type: 'scroll',
         bottom: 0,
-        itemGap: 12,
-        itemWidth: 12,
-        itemHeight: 10,
-        textStyle: { fontSize: 11 },
-        pageIconSize: 12
+        itemGap: 8,
+        itemWidth: 10,
+        itemHeight: 8,
+        textStyle: { fontSize: 10 },
+        pageIconSize: 10
       },
       grid: {
-        left: 50,
-        right: 20,
-        top: 20,
-        bottom: 60,
-        containLabel: false
+        left: 40,
+        right: 10,
+        top: 15,
+        bottom: 80
       },
       xAxis: {
         type: 'category',
         data: data.types,
         axisLabel: { 
           interval: 0, 
-          rotate: data.types.length > 4 ? 30 : 0,
-          fontSize: 11,
-          margin: 10
+          rotate: 45,
+          fontSize: 10,
+          margin: 8
         }
       },
       yAxis: { 
         type: 'value', 
         name: '数量',
-        nameTextStyle: { fontSize: 11 },
-        axisLabel: { fontSize: 11 }
+        nameTextStyle: { fontSize: 10 },
+        axisLabel: { fontSize: 10 }
       },
       series: data.series.map((s, i) => ({
         name: s.name,
         type: 'bar',
         stack: 'total',
-        barMaxWidth: 35,
+        barMaxWidth: 25,
         data: s.data,
         itemStyle: {
           color: ['#0d9488', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#10b981', '#6366f1'][i % 8]
@@ -580,7 +579,7 @@ onUnmounted(() => {
 }
 
 .chart-container {
-  height: 280px;
+  height: 300px;
 }
 
 @media (max-width: 1200px) {
