@@ -677,13 +677,13 @@ onUnmounted(() => {
 }
 
 .pending-cards-wrapper {
-  overflow-x: auto;
+  /* 不需要滚动 */
 }
 
 .pending-cards {
   display: flex;
   gap: 12px;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
 }
 
 .pending-card {
