@@ -48,8 +48,8 @@ router.post('/', authenticateToken, (req, res) => {
 
     run(`INSERT INTO scrap_requests (id, equipment_id, equipment_code, equipment_name, 
       reason, assessed_value, applicant, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      [id, equipment_id, equipment_code, equipment_name, reason, assessed_value, 
-        req.user.name || req.user.username, '待审核']);
+      [id, equipment_id || null, equipment_code || null, equipment_name, reason || null, 
+        assessed_value || null, req.user.name || req.user.username, '待审核']);
 
     // 更新设备状态为待报废
     if (equipment_id) {

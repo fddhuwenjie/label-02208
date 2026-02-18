@@ -333,9 +333,13 @@ const fetchStats = async () => {
     
     // 趋势图
     trendChart = echarts.init(trendChartRef.value)
+    
+    // 年度采购计划（模拟数据，每月平均计划金额）
+    const monthlyPlanAmount = 500000 // 每月计划50万
+    
     trendChart.setOption({
       tooltip: { trigger: 'axis', confine: true },
-      legend: { data: ['采购金额', '采购数量'], bottom: 0, itemGap: 12, textStyle: { fontSize: 11 } },
+      legend: { data: ['采购金额', '采购数量', '年度计划'], bottom: 0, itemGap: 12, textStyle: { fontSize: 11 } },
       grid: { left: 50, right: 40, top: 20, bottom: 50 },
       xAxis: { type: 'category', data: data.monthlyTrend.map(i => i.month), axisLabel: { fontSize: 11 } },
       yAxis: [
@@ -348,6 +352,14 @@ const fetchStats = async () => {
           type: 'bar',
           data: data.monthlyTrend.map(i => i.amount || 0),
           itemStyle: { color: '#0d9488' }
+        },
+        {
+          name: '年度计划',
+          type: 'line',
+          data: data.monthlyTrend.map(() => monthlyPlanAmount),
+          itemStyle: { color: '#ef4444' },
+          lineStyle: { type: 'dashed', width: 2 },
+          symbol: 'none'
         },
         {
           name: '采购数量',

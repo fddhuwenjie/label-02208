@@ -9,7 +9,7 @@
     </div>
 
     <div class="content-grid">
-      <!-- 左侧：日历视图 + 维护完成率 -->
+      <!-- 左侧：日历视图 + 图表 -->
       <div class="left-section">
         <!-- 维护计划日历 -->
         <div class="medical-card calendar-card">
@@ -27,11 +27,18 @@
           </el-calendar>
         </div>
 
-        <!-- 维护完成率图表 -->
-        <div class="medical-card">
-          <h3>各科室维护完成情况</h3>
-          <div class="chart-container" ref="deptChartRef" v-show="hasDeptData"></div>
-          <el-empty v-show="!hasDeptData" description="暂无维护数据" :image-size="100" />
+        <!-- 维护完成率图表 + 雷达图 -->
+        <div class="charts-row">
+          <div class="medical-card">
+            <h3>各科室维护完成情况</h3>
+            <div class="chart-container" ref="deptChartRef" v-show="hasDeptData"></div>
+            <el-empty v-show="!hasDeptData" description="暂无维护数据" :image-size="80" />
+          </div>
+          <div class="medical-card">
+            <h3>维护维度雷达图</h3>
+            <div class="chart-container" ref="radarChartRef" v-show="hasRadarData"></div>
+            <el-empty v-show="!hasRadarData" description="暂无数据" :image-size="80" />
+          </div>
         </div>
       </div>
 
@@ -223,11 +230,14 @@ const dispatchingFault = ref(null)
 
 const deptChartRef = ref(null)
 const faultPieRef = ref(null)
+const radarChartRef = ref(null)
 let deptChart = null
 let faultPieChart = null
+let radarChart = null
 
 // 数据状态
 const hasDeptData = ref(false)
+const hasRadarData = ref(false)
 
 const formatDate = (date) => {
   if (!date) return '-'
@@ -328,6 +338,63 @@ const fetchStats = async () => {
         }]
       })
     }
+
+    // 维护维度雷达图
+    if (maintenanceStats.byDepartment?.length) {
+      hasRadarData.value = true
+      radarChart = echarts.init(radarChartRef.value)
+      
+      const radarData = maintenanceStats.byDepartment.slice(0, 5).map(d => {
+        const completionRate = d.total > 0 ? Math.round((d.completed / d.total) * 100) : 0
+        return {
+          name: d.department || '未分配',
+          value: [
+            completionRate,
+            Math.round(Math.random() * 20 + 80), // 及时率（模拟）
+            Math.round(Math.random() * 15 + 85), // 质量达标率（模拟）
+            Math.round(Math.random() * 25 + 75), // 成本控制（模拟）
+            Math.round(Math.random() * 20 + 80)  // 设备完好率（模拟）
+          ]
+        }
+      })
+
+      radarChart.setOption({
+        tooltip: { trigger: 'item', confine: true },
+        legend: {
+          data: radarData.map(d => d.name),
+          type: 'scroll',
+          bottom: 0,
+          itemGap: 6,
+          itemWidth: 10,
+          textStyle: { fontSize: 10 },
+          pageIconSize: 10
+        },
+        radar: {
+          indicator: [
+            { name: '完成率', max: 100 },
+            { name: '及时率', max: 100 },
+            { name: '质量达标', max: 100 },
+            { name: '成本控制', max: 100 },
+            { name: '设备完好', max: 100 }
+          ],
+          center: ['50%', '45%'],
+          radius: '55%',
+          axisName: { color: '#64748b', fontSize: 10 },
+          splitArea: { areaStyle: { color: ['#f8fafc', '#f1f5f9', '#e2e8f0', '#cbd5e1'] } }
+        },
+        series: [{
+          type: 'radar',
+          data: radarData.map((d, i) => ({
+            name: d.name,
+            value: d.value,
+            itemStyle: { color: ['#0d9488', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6'][i % 5] },
+            areaStyle: { opacity: 0.2 }
+          }))
+        }]
+      })
+    } else {
+      hasRadarData.value = false
+    }
   } catch (e) {}
 }
 
@@ -418,6 +485,7 @@ const handleClose = async (fault) => {
 const handleResize = () => {
   deptChart?.resize()
   faultPieChart?.resize()
+  radarChart?.resize()
 }
 
 watch(calendarDate, () => {
@@ -436,6 +504,7 @@ onUnmounted(() => {
   window.removeEventListener('resize', handleResize)
   deptChart?.dispose()
   faultPieChart?.dispose()
+  radarChart?.dispose()
 })
 </script>
 
@@ -452,6 +521,17 @@ onUnmounted(() => {
   flex-direction: column;
   gap: 20px;
   overflow-y: auto;
+}
+
+.charts-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.charts-row .medical-card h3 {
+  font-size: 14px;
+  margin-bottom: 12px;
 }
 
 .right-section {

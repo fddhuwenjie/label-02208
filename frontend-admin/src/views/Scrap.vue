@@ -25,10 +25,16 @@
           </div>
         </div>
 
-        <!-- 报废趋势 -->
-        <div class="medical-card">
-          <h3>近6个月报废趋势</h3>
-          <div class="chart-container" ref="trendChartRef"></div>
+        <!-- 报废趋势 + 年限分析 -->
+        <div class="grid-container grid-2">
+          <div class="medical-card">
+            <h3>近6个月报废趋势</h3>
+            <div class="chart-container" ref="trendChartRef"></div>
+          </div>
+          <div class="medical-card">
+            <h3>报废合理性分析（按使用年限）</h3>
+            <div class="chart-container" ref="yearAnalysisChartRef"></div>
+          </div>
         </div>
       </div>
 
@@ -225,9 +231,11 @@ const disposingItem = ref(null)
 const statusChartRef = ref(null)
 const deptChartRef = ref(null)
 const trendChartRef = ref(null)
+const yearAnalysisChartRef = ref(null)
 let statusChart = null
 let deptChart = null
 let trendChart = null
+let yearAnalysisChart = null
 
 const formatDate = (date) => {
   if (!date) return '-'
@@ -345,6 +353,56 @@ const fetchStats = async () => {
         ]
       })
     }
+
+    // 报废合理性分析（按使用年限）
+    yearAnalysisChart = echarts.init(yearAnalysisChartRef.value)
+    // 模拟数据：按使用年限分布的报废设备
+    const yearData = [
+      { range: '0-3年', count: 2, reasonable: false },
+      { range: '3-5年', count: 5, reasonable: false },
+      { range: '5-8年', count: 12, reasonable: true },
+      { range: '8-10年', count: 18, reasonable: true },
+      { range: '>10年', count: 8, reasonable: true }
+    ]
+    yearAnalysisChart.setOption({
+      tooltip: { 
+        trigger: 'axis', 
+        confine: true,
+        formatter: params => {
+          const d = yearData[params[0].dataIndex]
+          return `${d.range}<br/>报废数量: ${d.count}<br/>合理性: ${d.reasonable ? '✓ 合理' : '⚠ 需审核'}`
+        }
+      },
+      grid: { left: 50, right: 20, top: 30, bottom: 30 },
+      xAxis: { 
+        type: 'category', 
+        data: yearData.map(d => d.range),
+        axisLabel: { fontSize: 11 }
+      },
+      yAxis: { type: 'value', name: '数量', axisLabel: { fontSize: 11 }, nameTextStyle: { fontSize: 11 } },
+      series: [{
+        type: 'bar',
+        data: yearData.map(d => ({
+          value: d.count,
+          itemStyle: { 
+            color: d.reasonable ? '#10b981' : '#f59e0b',
+            borderRadius: [4, 4, 0, 0]
+          }
+        })),
+        label: {
+          show: true,
+          position: 'top',
+          formatter: params => yearData[params.dataIndex].reasonable ? '' : '⚠',
+          fontSize: 14
+        },
+        markLine: {
+          silent: true,
+          symbol: 'none',
+          lineStyle: { color: '#ef4444', type: 'dashed' },
+          data: [{ xAxis: 1.5, label: { formatter: '合理报废线', fontSize: 10 } }]
+        }
+      }]
+    })
   } catch (e) {}
 }
 
@@ -421,6 +479,7 @@ const handleResize = () => {
   statusChart?.resize()
   deptChart?.resize()
   trendChart?.resize()
+  yearAnalysisChart?.resize()
 }
 
 onMounted(() => {
@@ -435,6 +494,7 @@ onUnmounted(() => {
   statusChart?.dispose()
   deptChart?.dispose()
   trendChart?.dispose()
+  yearAnalysisChart?.dispose()
 })
 </script>
 
@@ -463,6 +523,10 @@ onUnmounted(() => {
 }
 
 .chart-area > .medical-card .chart-container {
+  height: 180px;
+}
+
+.chart-area > .grid-container .chart-container {
   height: 180px;
 }
 

@@ -166,8 +166,9 @@ router.post('/', authenticateToken, (req, res) => {
       `INSERT INTO equipment (id, code, name, model, type, department, purchase_date, 
         service_years, maintenance_cycle, responsible_person, supplier, price, location, description) 
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [id, code, name, model, type, department, purchase_date, service_years,
-        maintenance_cycle, responsible_person, supplier, price, location, description]
+      [id, code, name, model || null, type || null, department || null, purchase_date || null, 
+        service_years || null, maintenance_cycle || null, responsible_person || null, 
+        supplier || null, price || null, location || null, description || null]
     );
 
     // 记录操作日志
@@ -222,8 +223,9 @@ router.put('/:id', authenticateToken, (req, res) => {
       `UPDATE equipment SET name=?, model=?, type=?, department=?, purchase_date=?, 
         service_years=?, status=?, maintenance_cycle=?, responsible_person=?, supplier=?, 
         price=?, location=?, description=?, updated_at=datetime('now') WHERE id=?`,
-      [name, model, type, department, purchase_date, service_years, status,
-        maintenance_cycle, responsible_person, supplier, price, location, description, req.params.id]
+      [name || null, model || null, type || null, department || null, purchase_date || null, 
+        service_years || null, status || null, maintenance_cycle || null, responsible_person || null, 
+        supplier || null, price || null, location || null, description || null, req.params.id]
     );
 
     // 记录操作日志

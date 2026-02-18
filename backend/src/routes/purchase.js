@@ -49,8 +49,8 @@ router.post('/', authenticateToken, (req, res) => {
 
     run(`INSERT INTO purchase_requests (id, request_no, equipment_name, model, type, 
       department, quantity, budget, reason, applicant, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [id, request_no, equipment_name, model, type, department, quantity, budget, reason, 
-        req.user.name || req.user.username, '待审批']);
+      [id, request_no, equipment_name, model || null, type || null, department || null, 
+        quantity || null, budget || null, reason || null, req.user.name || req.user.username, '待审批']);
 
     res.json({ message: '采购申请提交成功', id, request_no });
   } catch (error) {

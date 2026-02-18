@@ -8,7 +8,7 @@ const router = express.Router();
 // 获取维护记录列表
 router.get('/', authenticateToken, (req, res) => {
   try {
-    const { status, type, date } = req.query;
+    const { status, type, date, equipment_id } = req.query;
     let whereClause = '1=1';
     const params = [];
 
@@ -24,8 +24,12 @@ router.get('/', authenticateToken, (req, res) => {
       whereClause += ' AND scheduled_date = ?';
       params.push(date);
     }
+    if (equipment_id) {
+      whereClause += ' AND equipment_id = ?';
+      params.push(equipment_id);
+    }
 
-    const list = query(`SELECT * FROM maintenance_records WHERE ${whereClause} ORDER BY scheduled_date`, params);
+    const list = query(`SELECT * FROM maintenance_records WHERE ${whereClause} ORDER BY scheduled_date DESC`, params);
     res.json(list);
   } catch (error) {
     console.error('Get maintenance records error:', error);

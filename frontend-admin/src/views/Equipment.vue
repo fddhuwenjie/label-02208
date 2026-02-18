@@ -92,10 +92,11 @@
               <template #default="{ row }">{{ row.maintenance_cycle }}天</template>
             </el-table-column>
             <el-table-column prop="responsible_person" label="责任人" width="100" />
-            <el-table-column label="操作" width="180" fixed="right">
+            <el-table-column label="操作" width="220" fixed="right">
               <template #default="{ row }">
                 <el-button link type="primary" size="small" @click="handleView(row)">详情</el-button>
                 <el-button link type="primary" size="small" @click="handleEdit(row)">编辑</el-button>
+                <el-button link type="primary" size="small" @click="handleViewMaintenance(row)">维护记录</el-button>
                 <el-button link type="danger" size="small" @click="handleDelete(row)">删除</el-button>
               </template>
             </el-table-column>
@@ -298,6 +299,39 @@
         <el-button type="primary" @click="handleImport" :disabled="!importPreview.length">导入</el-button>
       </template>
     </el-dialog>
+
+    <!-- 维护记录对话框 -->
+    <el-dialog v-model="maintenanceDialogVisible" :title="`${currentRow.name} - 维护记录`" width="700px">
+      <div class="maintenance-records" v-loading="maintenanceLoading">
+        <el-empty v-if="!maintenanceLoading && !maintenanceRecords.length" description="暂无维护记录" />
+        <el-timeline v-else>
+          <el-timeline-item
+            v-for="record in maintenanceRecords"
+            :key="record.id"
+            :timestamp="record.scheduled_date"
+            :type="record.status === '已完成' ? 'success' : record.status === '进行中' ? 'primary' : 'warning'"
+            placement="top"
+          >
+            <div class="record-card">
+              <div class="record-header">
+                <el-tag :type="getMaintenanceTypeTag(record.type)" size="small">{{ record.type }}</el-tag>
+                <el-tag :type="record.status === '已完成' ? 'success' : 'warning'" size="small">{{ record.status }}</el-tag>
+              </div>
+              <div class="record-info">
+                <span>负责人：{{ record.responsible_person }}</span>
+                <span v-if="record.cost">费用：¥{{ record.cost }}</span>
+              </div>
+              <div class="record-desc" v-if="record.description">{{ record.description }}</div>
+              <div class="record-result" v-if="record.result">结果：{{ record.result }}</div>
+            </div>
+          </el-timeline-item>
+        </el-timeline>
+      </div>
+      <template #footer>
+        <el-button @click="maintenanceDialogVisible = false">关闭</el-button>
+        <el-button type="primary" @click="goToMaintenance">前往维护管理</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -313,9 +347,13 @@
  * 5. 图表展示（完整率、年限分布）
  */
 import { ref, onMounted, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import * as echarts from 'echarts'
 import api from '../utils/api'
+
+// ==================== 路由 ====================
+const router = useRouter()
 
 // ==================== 状态定义 ====================
 
@@ -377,6 +415,11 @@ const showImportDialog = ref(false)
 const importFileList = ref([])
 const importPreview = ref([])
 const importData = ref([])
+
+/** 维护记录对话框 */
+const maintenanceDialogVisible = ref(false)
+const maintenanceRecords = ref([])
+const maintenanceLoading = ref(false)
 
 // ==================== 图表引用 ====================
 
@@ -536,6 +579,33 @@ const handleEdit = (row) => {
 const handleView = (row) => {
   currentRow.value = row
   detailVisible.value = true
+}
+
+/** 查看设备维护记录 */
+const handleViewMaintenance = async (row) => {
+  currentRow.value = row
+  maintenanceDialogVisible.value = true
+  maintenanceLoading.value = true
+  try {
+    // 获取该设备的维护记录
+    const data = await api.get('/maintenance', { params: { equipment_id: row.id } })
+    maintenanceRecords.value = data || []
+  } catch (e) {
+    maintenanceRecords.value = []
+  }
+  maintenanceLoading.value = false
+}
+
+/** 获取维护类型标签颜色 */
+const getMaintenanceTypeTag = (type) => {
+  const map = { '日常维护': '', '校准': 'warning', '故障维修': 'danger' }
+  return map[type] || ''
+}
+
+/** 跳转到维护管理页面 */
+const goToMaintenance = () => {
+  maintenanceDialogVisible.value = false
+  router.push('/maintenance')
 }
 
 /** 删除设备 */
@@ -910,6 +980,39 @@ onUnmounted(() => {
 .import-preview h4 {
   font-size: 14px;
   margin-bottom: 8px;
+}
+
+/* 维护记录样式 */
+.maintenance-records {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.maintenance-records .record-card {
+  background: var(--medical-bg);
+  padding: 12px;
+  border-radius: 8px;
+}
+
+.maintenance-records .record-header {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.maintenance-records .record-info {
+  font-size: 13px;
+  color: var(--medical-text-secondary);
+  display: flex;
+  gap: 16px;
+  margin-bottom: 6px;
+}
+
+.maintenance-records .record-desc,
+.maintenance-records .record-result {
+  font-size: 13px;
+  color: var(--medical-text-secondary);
+  margin-top: 6px;
 }
 
 /* 头部操作按钮 */
