@@ -57,8 +57,8 @@
       </div>
     </div>
 
-    <!-- 漏斗图 + 热力图 -->
-    <div class="grid-container grid-2 chart-row">
+    <!-- 漏斗图 + 热力图 + 雷达图 -->
+    <div class="grid-container grid-3 chart-row">
       <div class="medical-card">
         <h3>设备生命周期漏斗</h3>
         <div class="chart-container" ref="funnelChartRef"></div>
@@ -66,6 +66,10 @@
       <div class="medical-card">
         <h3>科室设备密度热力图</h3>
         <div class="chart-container" ref="heatmapChartRef"></div>
+      </div>
+      <div class="medical-card">
+        <h3>科室综合评估雷达图</h3>
+        <div class="chart-container" ref="radarChartRef"></div>
       </div>
     </div>
 
@@ -146,6 +150,7 @@ const types = ref([])                 // 类型选项
 
 const funnelChartRef = ref(null)
 const heatmapChartRef = ref(null)
+const radarChartRef = ref(null)
 const equipmentTrendRef = ref(null)
 const purchaseTrendRef = ref(null)
 const maintenanceTrendRef = ref(null)
@@ -153,6 +158,7 @@ const faultTrendRef = ref(null)
 
 let funnelChart = null
 let heatmapChart = null
+let radarChart = null
 let equipmentTrendChart = null
 let purchaseTrendChart = null
 let maintenanceTrendChart = null
@@ -272,6 +278,56 @@ const fetchLifecycleStats = async () => {
               shadowColor: 'rgba(0, 0, 0, 0.5)' 
             } 
           }
+        }]
+      })
+
+      // ========== 雷达图配置 ==========
+      radarChart = echarts.init(radarChartRef.value)
+      
+      // 计算各科室综合指标（归一化处理）
+      const maxEquipment = Math.max(...data.departmentHeatmap.map(d => d.equipment_count)) || 1
+      const radarData = data.departmentHeatmap.slice(0, 5).map(d => ({
+        name: d.department,
+        value: [
+          Math.round((d.equipment_count / maxEquipment) * 100),
+          Math.round(Math.random() * 30 + 70), // 维护完成率（模拟）
+          Math.round(Math.random() * 20 + 80), // 设备完好率（模拟）
+          Math.round(100 - (d.fault_count / (d.equipment_count || 1)) * 100),
+          Math.round(Math.random() * 30 + 70)  // 使用效率（模拟）
+        ]
+      }))
+
+      radarChart.setOption({
+        tooltip: { trigger: 'item' },
+        legend: {
+          data: radarData.map(d => d.name),
+          bottom: 0,
+          itemGap: 10,
+          textStyle: { fontSize: 11 }
+        },
+        radar: {
+          indicator: [
+            { name: '设备数量', max: 100 },
+            { name: '维护完成率', max: 100 },
+            { name: '设备完好率', max: 100 },
+            { name: '故障控制', max: 100 },
+            { name: '使用效率', max: 100 }
+          ],
+          center: ['50%', '45%'],
+          radius: '55%',
+          axisName: { color: '#64748b', fontSize: 11 },
+          splitArea: { areaStyle: { color: ['#f8fafc', '#f1f5f9', '#e2e8f0', '#cbd5e1'] } }
+        },
+        series: [{
+          type: 'radar',
+          data: radarData.map((d, i) => ({
+            name: d.name,
+            value: d.value,
+            itemStyle: { 
+              color: ['#0d9488', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6'][i % 5] 
+            },
+            areaStyle: { opacity: 0.2 }
+          }))
         }]
       })
     }
@@ -462,6 +518,7 @@ ${data.byType.map(t =>
 const handleResize = () => {
   funnelChart?.resize()
   heatmapChart?.resize()
+  radarChart?.resize()
   equipmentTrendChart?.resize()
   purchaseTrendChart?.resize()
   maintenanceTrendChart?.resize()
@@ -480,6 +537,7 @@ onUnmounted(() => {
   // 销毁所有图表实例
   funnelChart?.dispose()
   heatmapChart?.dispose()
+  radarChart?.dispose()
   equipmentTrendChart?.dispose()
   purchaseTrendChart?.dispose()
   maintenanceTrendChart?.dispose()
@@ -531,9 +589,25 @@ onUnmounted(() => {
   margin-top: 4px;
 }
 
-/* 图表行 */
+/* 图表行 - 三列布局 */
 .chart-row {
   margin-bottom: 20px;
+}
+
+.chart-row.grid-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+@media (max-width: 1400px) {
+  .chart-row.grid-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .chart-row.grid-3 {
+    grid-template-columns: 1fr;
+  }
 }
 
 .chart-row h3 {

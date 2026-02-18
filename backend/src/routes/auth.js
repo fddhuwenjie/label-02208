@@ -75,12 +75,36 @@ router.post('/change-password', authenticateToken, (req, res) => {
       return res.status(400).json({ message: '原密码错误' });
     }
 
+    // 密码复杂度验证
+    if (newPassword.length < 8) {
+      return res.status(400).json({ message: '密码长度至少8位' });
+    }
+
     const hashedPassword = bcrypt.hashSync(newPassword, 10);
     run('UPDATE users SET password = ? WHERE id = ?', [hashedPassword, req.user.id]);
 
     res.json({ message: '密码修改成功' });
   } catch (error) {
     console.error('Change password error:', error);
+    res.status(500).json({ message: '服务器错误' });
+  }
+});
+
+// 更新个人信息
+router.put('/profile', authenticateToken, (req, res) => {
+  try {
+    const { name, department } = req.body;
+    
+    if (!name) {
+      return res.status(400).json({ message: '姓名不能为空' });
+    }
+
+    run('UPDATE users SET name = ?, department = ? WHERE id = ?', 
+      [name, department, req.user.id]);
+
+    res.json({ message: '个人信息更新成功' });
+  } catch (error) {
+    console.error('Update profile error:', error);
     res.status(500).json({ message: '服务器错误' });
   }
 });

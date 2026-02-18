@@ -338,24 +338,39 @@ const fetchTypeDeptDistribution = async () => {
       legend: {
         data: data.departments,
         bottom: 0,
-        itemGap: 12
+        itemGap: 16,
+        itemWidth: 14,
+        itemHeight: 10,
+        textStyle: { fontSize: 12 }
       },
       grid: {
-        left: 60,
+        left: 50,
         right: 20,
-        top: 20,
-        bottom: 60
+        top: 30,
+        bottom: 80,
+        containLabel: false
       },
       xAxis: {
         type: 'category',
         data: data.types,
-        axisLabel: { interval: 0, rotate: 30 }
+        axisLabel: { 
+          interval: 0, 
+          rotate: 30,
+          fontSize: 11,
+          margin: 12
+        }
       },
-      yAxis: { type: 'value', name: '数量' },
+      yAxis: { 
+        type: 'value', 
+        name: '数量',
+        nameTextStyle: { fontSize: 12, padding: [0, 0, 0, 30] },
+        axisLabel: { fontSize: 11 }
+      },
       series: data.series.map((s, i) => ({
         name: s.name,
         type: 'bar',
         stack: 'total',
+        barMaxWidth: 40,
         data: s.data,
         itemStyle: {
           color: ['#0d9488', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#10b981', '#6366f1'][i % 8]
@@ -539,7 +554,7 @@ onUnmounted(() => {
 }
 
 .chart-container {
-  height: 280px;
+  height: 320px;
 }
 
 .progress-card-content {
