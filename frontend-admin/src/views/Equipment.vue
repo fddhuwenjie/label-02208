@@ -565,7 +565,7 @@ const handleSubmit = async () => {
     dialogVisible.value = false
     fetchList()
   } catch (e) {
-    ElMessage.error(e.response?.data?.message || '操作失败')
+    // 错误已在api拦截器中处理
   }
 }
 

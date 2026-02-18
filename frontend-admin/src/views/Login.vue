@@ -41,9 +41,6 @@
           </el-button>
         </el-form-item>
       </el-form>
-      <div class="login-tips">
-        <p>测试账号：admin / admin123</p>
-      </div>
     </div>
   </div>
 </template>
@@ -214,43 +211,6 @@ const handleLogin = async () => {
 .login-box :deep(.el-button--primary:active) {
   transform: translateY(0);
 }
-
-/* 提示信息 */
-.login-tips {
-  text-align: center;
-  margin-top: 24px;
-  padding-top: 24px;
-  border-top: 1px solid #f1f5f9;
-}
-
-.login-tips p {
-  color: #64748b;
-  font-size: 13px;
-  background: #f8fafc;
-  padding: 10px 16px;
-  border-radius: 8px;
-  display: inline-block;
-}
-
-/* 密码强度提示 */
-.password-strength {
-  display: flex;
-  gap: 4px;
-  margin-top: 8px;
-}
-
-.password-strength .bar {
-  flex: 1;
-  height: 4px;
-  background: #e2e8f0;
-  border-radius: 2px;
-  transition: all 0.3s;
-}
-
-.password-strength.weak .bar:nth-child(1) { background: #ef4444; }
-.password-strength.medium .bar:nth-child(1),
-.password-strength.medium .bar:nth-child(2) { background: #f59e0b; }
-.password-strength.strong .bar { background: #10b981; }
 
 /* 响应式 */
 @media (max-width: 480px) {

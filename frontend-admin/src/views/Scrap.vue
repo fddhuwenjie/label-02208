@@ -37,7 +37,7 @@
         <div class="medical-card">
           <div class="section-header">
             <h3>报废申请</h3>
-            <el-select v-model="statusFilter" placeholder="筛选状态" clearable size="small" @change="fetchList">
+            <el-select v-model="statusFilter" placeholder="筛选状态" clearable size="small" style="width: 160px" @change="fetchList">
               <el-option label="待审核" value="待审核" />
               <el-option label="审核通过待处置" value="审核通过待处置" />
               <el-option label="已报废" value="已报废" />
@@ -47,7 +47,7 @@
 
           <div class="scrap-list" v-loading="loading">
             <div 
-              class="scrap-card" 
+              class="scrap-card"
               v-for="item in list" 
               :key="item.id"
               :class="getCardClass(item.status)"
@@ -481,10 +481,13 @@ onUnmounted(() => {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .section-header h3 {
   font-size: 16px;
+  white-space: nowrap;
 }
 
 .scrap-list {

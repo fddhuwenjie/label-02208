@@ -77,29 +77,37 @@
                   <div class="progress-item">
                     <div class="progress-label">
                       <span>本月维护完成率</span>
-                      <span>{{ maintenanceProgress.monthRate }}%</span>
+                      <span class="rate-value" :class="maintenanceProgress.monthRate >= 80 ? 'good' : maintenanceProgress.monthRate >= 60 ? 'warn' : 'bad'">{{ maintenanceProgress.monthRate }}%</span>
                     </div>
-                    <el-progress 
-                      :percentage="maintenanceProgress.monthRate" 
-                      :color="getProgressColor(maintenanceProgress.monthRate)"
-                      :stroke-width="12"
-                    />
+                    <div class="progress-bar-wrapper">
+                      <el-progress 
+                        :percentage="maintenanceProgress.monthRate" 
+                        :color="getProgressColor(maintenanceProgress.monthRate)"
+                        :stroke-width="10"
+                        :show-text="false"
+                      />
+                      <div class="target-line" style="left: 80%;" title="目标值: 80%"></div>
+                    </div>
                     <div class="progress-detail">
-                      已完成 {{ maintenanceProgress.monthCompleted }} / {{ maintenanceProgress.monthTotal }} 项
+                      已完成 {{ maintenanceProgress.monthCompleted }} / {{ maintenanceProgress.monthTotal }} 项 <span class="target-hint">（目标≥80%）</span>
                     </div>
                   </div>
                   <div class="progress-item">
                     <div class="progress-label">
                       <span>年度校准完成率</span>
-                      <span>{{ maintenanceProgress.yearCalibrationRate }}%</span>
+                      <span class="rate-value" :class="maintenanceProgress.yearCalibrationRate >= 80 ? 'good' : maintenanceProgress.yearCalibrationRate >= 60 ? 'warn' : 'bad'">{{ maintenanceProgress.yearCalibrationRate }}%</span>
                     </div>
-                    <el-progress 
-                      :percentage="maintenanceProgress.yearCalibrationRate" 
-                      :color="getProgressColor(maintenanceProgress.yearCalibrationRate)"
-                      :stroke-width="12"
-                    />
+                    <div class="progress-bar-wrapper">
+                      <el-progress 
+                        :percentage="maintenanceProgress.yearCalibrationRate" 
+                        :color="getProgressColor(maintenanceProgress.yearCalibrationRate)"
+                        :stroke-width="10"
+                        :show-text="false"
+                      />
+                      <div class="target-line" style="left: 80%;" title="目标值: 80%"></div>
+                    </div>
                     <div class="progress-detail">
-                      已完成 {{ maintenanceProgress.yearCalibrationCompleted }} / {{ maintenanceProgress.yearCalibrationTotal }} 项
+                      已完成 {{ maintenanceProgress.yearCalibrationCompleted }} / {{ maintenanceProgress.yearCalibrationTotal }} 项 <span class="target-hint">（目标≥80%）</span>
                     </div>
                   </div>
                 </div>
@@ -620,10 +628,46 @@ onUnmounted(() => {
   font-size: 14px;
 }
 
+.progress-label .rate-value {
+  font-weight: 600;
+}
+
+.progress-label .rate-value.good { color: #10b981; }
+.progress-label .rate-value.warn { color: #f59e0b; }
+.progress-label .rate-value.bad { color: #ef4444; }
+
+.progress-bar-wrapper {
+  position: relative;
+}
+
+.progress-bar-wrapper .target-line {
+  position: absolute;
+  top: 0;
+  width: 2px;
+  height: 100%;
+  background: #1e293b;
+  z-index: 1;
+}
+
+.progress-bar-wrapper .target-line::after {
+  content: '';
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  width: 8px;
+  height: 8px;
+  background: #1e293b;
+  border-radius: 50%;
+}
+
 .progress-detail {
   font-size: 12px;
   color: var(--medical-text-secondary);
   margin-top: 6px;
+}
+
+.progress-detail .target-hint {
+  color: #94a3b8;
 }
 
 .pending-list h4 {
