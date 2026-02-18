@@ -334,13 +334,13 @@ const fetchStats = async () => {
     // 趋势图
     trendChart = echarts.init(trendChartRef.value)
     trendChart.setOption({
-      tooltip: { trigger: 'axis' },
-      legend: { data: ['采购金额', '采购数量'], bottom: 0 },
-      grid: { left: 60, right: 40, top: 20, bottom: 50 },
-      xAxis: { type: 'category', data: data.monthlyTrend.map(i => i.month) },
+      tooltip: { trigger: 'axis', confine: true },
+      legend: { data: ['采购金额', '采购数量'], bottom: 0, itemGap: 12, textStyle: { fontSize: 11 } },
+      grid: { left: 50, right: 40, top: 20, bottom: 50 },
+      xAxis: { type: 'category', data: data.monthlyTrend.map(i => i.month), axisLabel: { fontSize: 11 } },
       yAxis: [
-        { type: 'value', name: '金额(万)', axisLabel: { formatter: v => (v / 10000).toFixed(0) } },
-        { type: 'value', name: '数量' }
+        { type: 'value', name: '金额(万)', axisLabel: { formatter: v => (v / 10000).toFixed(0), fontSize: 11 }, nameTextStyle: { fontSize: 11 } },
+        { type: 'value', name: '数量', axisLabel: { fontSize: 11 }, nameTextStyle: { fontSize: 11 } }
       ],
       series: [
         {
@@ -362,7 +362,7 @@ const fetchStats = async () => {
     // 漏斗图
     funnelChart = echarts.init(funnelChartRef.value)
     funnelChart.setOption({
-      tooltip: { trigger: 'item', formatter: '{b}: {c}' },
+      tooltip: { trigger: 'item', formatter: '{b}: {c}', confine: true },
       series: [{
         type: 'funnel',
         left: '10%',
@@ -373,7 +373,7 @@ const fetchStats = async () => {
         max: data.funnel.total || 100,
         sort: 'descending',
         gap: 2,
-        label: { show: true, position: 'inside' },
+        label: { show: true, position: 'inside', fontSize: 12 },
         itemStyle: { borderColor: '#fff', borderWidth: 1 },
         data: [
           { value: data.funnel.total, name: '申请', itemStyle: { color: '#3b82f6' } },
@@ -550,7 +550,7 @@ onUnmounted(() => {
 }
 
 .chart-section .chart-container {
-  height: 280px;
+  height: 240px;
 }
 
 .supplier-section h3 {

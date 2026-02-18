@@ -246,18 +246,21 @@ const fetchLifecycleStats = async () => {
       heatmapChart.setOption({
         tooltip: {
           position: 'top',
+          confine: true,
           formatter: p => `${depts[p.data[1]]}<br/>${metrics[p.data[0]]}: ${p.data[2]}`
         },
-        grid: { left: 80, right: 40, top: 20, bottom: 40 },
+        grid: { left: 80, right: 20, top: 10, bottom: 60 },
         xAxis: { 
           type: 'category', 
           data: metrics, 
-          splitArea: { show: true } 
+          splitArea: { show: true },
+          axisLabel: { fontSize: 11 }
         },
         yAxis: { 
           type: 'category', 
           data: depts, 
-          splitArea: { show: true } 
+          splitArea: { show: true },
+          axisLabel: { fontSize: 11 }
         },
         visualMap: {
           min: 0,
@@ -265,13 +268,16 @@ const fetchLifecycleStats = async () => {
           calculable: true,
           orient: 'horizontal',
           left: 'center',
-          bottom: 0,
+          bottom: 5,
+          itemWidth: 15,
+          itemHeight: 100,
+          textStyle: { fontSize: 10 },
           inRange: { color: ['#f0fdfa', '#0d9488'] }
         },
         series: [{
           type: 'heatmap',
           data: heatData,
-          label: { show: true },
+          label: { show: true, fontSize: 11 },
           emphasis: { 
             itemStyle: { 
               shadowBlur: 10, 
@@ -298,12 +304,15 @@ const fetchLifecycleStats = async () => {
       }))
 
       radarChart.setOption({
-        tooltip: { trigger: 'item' },
+        tooltip: { trigger: 'item', confine: true },
         legend: {
           data: radarData.map(d => d.name),
+          type: 'scroll',
           bottom: 0,
-          itemGap: 10,
-          textStyle: { fontSize: 11 }
+          itemGap: 8,
+          itemWidth: 12,
+          textStyle: { fontSize: 10 },
+          pageIconSize: 10
         },
         radar: {
           indicator: [
@@ -313,9 +322,9 @@ const fetchLifecycleStats = async () => {
             { name: '故障控制', max: 100 },
             { name: '使用效率', max: 100 }
           ],
-          center: ['50%', '45%'],
-          radius: '55%',
-          axisName: { color: '#64748b', fontSize: 11 },
+          center: ['50%', '42%'],
+          radius: '50%',
+          axisName: { color: '#64748b', fontSize: 10 },
           splitArea: { areaStyle: { color: ['#f8fafc', '#f1f5f9', '#e2e8f0', '#cbd5e1'] } }
         },
         series: [{
@@ -616,7 +625,7 @@ onUnmounted(() => {
 }
 
 .chart-row .chart-container {
-  height: 300px;
+  height: 260px;
 }
 
 /* 自定义统计区域 */
@@ -671,6 +680,10 @@ onUnmounted(() => {
 @media (max-width: 768px) {
   .indicator-card.large {
     min-width: 100%;
+  }
+  
+  .filter-area {
+    flex-wrap: wrap;
   }
 }
 </style>

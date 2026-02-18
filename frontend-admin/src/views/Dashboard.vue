@@ -48,7 +48,8 @@
               <h3>设备状态分布</h3>
               <span class="hint">点击可跳转对应管理页面</span>
             </div>
-            <div class="chart-container" ref="statusChartRef"></div>
+            <div class="chart-container" ref="statusChartRef" v-show="hasStatusData"></div>
+            <el-empty v-show="!hasStatusData" description="暂无设备数据" :image-size="80" />
           </div>
 
           <!-- 设备类型与科室分布 -->
@@ -56,7 +57,8 @@
             <div class="card-header">
               <h3>设备类型与科室分布</h3>
             </div>
-            <div class="chart-container" ref="typeDeptChartRef"></div>
+            <div class="chart-container" ref="typeDeptChartRef" v-show="hasTypeDeptData"></div>
+            <el-empty v-show="!hasTypeDeptData" description="暂无分布数据" :image-size="80" />
           </div>
         </div>
       </div>
@@ -197,6 +199,10 @@ const typeDeptChartRef = ref(null)
 let statusChart = null
 let typeDeptChart = null
 
+// ==================== 数据状态 ====================
+const hasStatusData = ref(false)
+const hasTypeDeptData = ref(false)
+
 // ==================== 核心指标数据 ====================
 /** 
  * 指标卡片配置
@@ -274,6 +280,13 @@ const fetchStatusDistribution = async () => {
   try {
     const data = await api.get('/dashboard/status-distribution')
     
+    // 检查是否有数据
+    if (!data?.length || data.every(d => d.count === 0)) {
+      hasStatusData.value = false
+      return
+    }
+    hasStatusData.value = true
+    
     // 状态颜色映射
     const statusColors = {
       '正常使用': '#10b981',
@@ -289,19 +302,20 @@ const fetchStatusDistribution = async () => {
       tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
       legend: {
         orient: 'vertical',
-        right: 20,
+        right: 10,
         top: 'center',
-        itemGap: 16
+        itemGap: 12,
+        textStyle: { fontSize: 12 }
       },
       series: [{
         type: 'pie',
-        radius: ['45%', '70%'],
+        radius: ['40%', '65%'],
         center: ['35%', '50%'],
         avoidLabelOverlap: true,
-        itemStyle: { borderRadius: 8, borderColor: '#fff', borderWidth: 2 },
+        itemStyle: { borderRadius: 6, borderColor: '#fff', borderWidth: 2 },
         label: { show: false },
         emphasis: {
-          label: { show: true, fontSize: 16, fontWeight: 'bold' }
+          label: { show: true, fontSize: 14, fontWeight: 'bold' }
         },
         data: data.map(item => ({
           name: item.status,
@@ -319,6 +333,7 @@ const fetchStatusDistribution = async () => {
     })
   } catch (e) {
     console.error('获取状态分布失败:', e)
+    hasStatusData.value = false
   }
 }
 
@@ -329,25 +344,35 @@ const fetchTypeDeptDistribution = async () => {
   try {
     const data = await api.get('/dashboard/type-department')
     
+    // 检查是否有数据
+    if (!data?.types?.length || !data?.series?.length) {
+      hasTypeDeptData.value = false
+      return
+    }
+    hasTypeDeptData.value = true
+    
     typeDeptChart = echarts.init(typeDeptChartRef.value)
     typeDeptChart.setOption({
       tooltip: {
         trigger: 'axis',
-        axisPointer: { type: 'shadow' }
+        axisPointer: { type: 'shadow' },
+        confine: true
       },
       legend: {
         data: data.departments,
+        type: 'scroll',
         bottom: 0,
-        itemGap: 16,
-        itemWidth: 14,
+        itemGap: 12,
+        itemWidth: 12,
         itemHeight: 10,
-        textStyle: { fontSize: 12 }
+        textStyle: { fontSize: 11 },
+        pageIconSize: 12
       },
       grid: {
         left: 50,
         right: 20,
-        top: 30,
-        bottom: 80,
+        top: 20,
+        bottom: 60,
         containLabel: false
       },
       xAxis: {
@@ -355,22 +380,22 @@ const fetchTypeDeptDistribution = async () => {
         data: data.types,
         axisLabel: { 
           interval: 0, 
-          rotate: 30,
+          rotate: data.types.length > 4 ? 30 : 0,
           fontSize: 11,
-          margin: 12
+          margin: 10
         }
       },
       yAxis: { 
         type: 'value', 
         name: '数量',
-        nameTextStyle: { fontSize: 12, padding: [0, 0, 0, 30] },
+        nameTextStyle: { fontSize: 11 },
         axisLabel: { fontSize: 11 }
       },
       series: data.series.map((s, i) => ({
         name: s.name,
         type: 'bar',
         stack: 'total',
-        barMaxWidth: 40,
+        barMaxWidth: 35,
         data: s.data,
         itemStyle: {
           color: ['#0d9488', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#10b981', '#6366f1'][i % 8]
@@ -379,6 +404,7 @@ const fetchTypeDeptDistribution = async () => {
     })
   } catch (e) {
     console.error('获取类型科室分布失败:', e)
+    hasTypeDeptData.value = false
   }
 }
 
@@ -554,7 +580,17 @@ onUnmounted(() => {
 }
 
 .chart-container {
-  height: 320px;
+  height: 280px;
+}
+
+@media (max-width: 1200px) {
+  .bottom-cards {
+    flex-direction: column;
+  }
+  
+  .bottom-cards .medical-card {
+    min-width: 100%;
+  }
 }
 
 .progress-card-content {
@@ -593,13 +629,13 @@ onUnmounted(() => {
 }
 
 .pending-cards-wrapper {
-  /* 移除内部滚动，让内容完全展示 */
+  overflow-x: auto;
 }
 
 .pending-cards {
   display: flex;
   gap: 12px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
 .pending-card {

@@ -454,17 +454,18 @@ const fetchChartData = async () => {
     // 初始化完整率折线图
     completenessChart = echarts.init(completenessChartRef.value)
     completenessChart.setOption({
-      tooltip: { trigger: 'axis' },
-      grid: { left: 50, right: 20, top: 20, bottom: 30 },
+      tooltip: { trigger: 'axis', confine: true },
+      grid: { left: 45, right: 15, top: 15, bottom: 25 },
       xAxis: {
         type: 'category',
-        data: data.completenessHistory.map(i => i.month)
+        data: data.completenessHistory.map(i => i.month),
+        axisLabel: { fontSize: 10 }
       },
       yAxis: { 
         type: 'value', 
         min: 90, 
         max: 100, 
-        axisLabel: { formatter: '{value}%' } 
+        axisLabel: { formatter: '{value}%', fontSize: 10 } 
       },
       series: [{
         type: 'line',
@@ -478,17 +479,17 @@ const fetchChartData = async () => {
     // 初始化年限分布饼图
     yearChart = echarts.init(yearChartRef.value)
     yearChart.setOption({
-      tooltip: { trigger: 'item' },
-      legend: { bottom: 0 },
+      tooltip: { trigger: 'item', confine: true },
+      legend: { bottom: 0, textStyle: { fontSize: 10 }, itemWidth: 10, itemHeight: 10 },
       series: [{
         type: 'pie',
-        radius: ['40%', '65%'],
-        center: ['50%', '45%'],
+        radius: ['35%', '60%'],
+        center: ['50%', '42%'],
         data: data.byYear.map(i => ({
           name: i.year_range,
           value: i.count
         })),
-        itemStyle: { borderRadius: 6 },
+        itemStyle: { borderRadius: 4 },
         label: { show: false }
       }]
     })
@@ -877,16 +878,17 @@ onUnmounted(() => {
 /* 图表区域样式 */
 .chart-section .medical-card {
   flex: 1;
+  min-height: 0;
 }
 
 .chart-section h3 {
   font-size: 14px;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .chart-section .chart-container {
-  height: calc(100% - 40px);
-  min-height: 200px;
+  height: calc(100% - 35px);
+  min-height: 180px;
 }
 
 /* 导入提示 */

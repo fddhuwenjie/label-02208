@@ -279,11 +279,11 @@ const fetchStats = async () => {
       }
       statusChart = echarts.init(statusChartRef.value)
       statusChart.setOption({
-        tooltip: { trigger: 'item' },
-        legend: { orient: 'vertical', right: 20, top: 'center' },
+        tooltip: { trigger: 'item', confine: true },
+        legend: { orient: 'vertical', right: 10, top: 'center', textStyle: { fontSize: 11 } },
         series: [{
           type: 'pie',
-          radius: ['45%', '70%'],
+          radius: ['40%', '65%'],
           center: ['35%', '50%'],
           data: data.byStatus.map(s => ({
             name: s.status,
@@ -300,12 +300,13 @@ const fetchStats = async () => {
     if (data.byDepartment?.length) {
       deptChart = echarts.init(deptChartRef.value)
       deptChart.setOption({
-        tooltip: { trigger: 'axis' },
-        grid: { left: 80, right: 20, top: 20, bottom: 20 },
-        xAxis: { type: 'value' },
+        tooltip: { trigger: 'axis', confine: true },
+        grid: { left: 80, right: 20, top: 10, bottom: 10 },
+        xAxis: { type: 'value', axisLabel: { fontSize: 11 } },
         yAxis: {
           type: 'category',
-          data: data.byDepartment.map(d => d.department || '未分配').reverse()
+          data: data.byDepartment.map(d => d.department || '未分配').reverse(),
+          axisLabel: { fontSize: 11 }
         },
         series: [{
           type: 'bar',
@@ -319,13 +320,13 @@ const fetchStats = async () => {
     if (data.monthlyTrend?.length) {
       trendChart = echarts.init(trendChartRef.value)
       trendChart.setOption({
-        tooltip: { trigger: 'axis' },
-        legend: { data: ['报废数量', '报废金额'], bottom: 0 },
-        grid: { left: 60, right: 60, top: 20, bottom: 50 },
-        xAxis: { type: 'category', data: data.monthlyTrend.map(t => t.month) },
+        tooltip: { trigger: 'axis', confine: true },
+        legend: { data: ['报废数量', '报废金额'], bottom: 0, textStyle: { fontSize: 11 } },
+        grid: { left: 50, right: 50, top: 10, bottom: 50 },
+        xAxis: { type: 'category', data: data.monthlyTrend.map(t => t.month), axisLabel: { fontSize: 11 } },
         yAxis: [
-          { type: 'value', name: '数量' },
-          { type: 'value', name: '金额(万)', axisLabel: { formatter: v => (v / 10000).toFixed(0) } }
+          { type: 'value', name: '数量', axisLabel: { fontSize: 11 }, nameTextStyle: { fontSize: 11 } },
+          { type: 'value', name: '金额(万)', axisLabel: { formatter: v => (v / 10000).toFixed(0), fontSize: 11 }, nameTextStyle: { fontSize: 11 } }
         ],
         series: [
           {
@@ -457,11 +458,11 @@ onUnmounted(() => {
 }
 
 .chart-container {
-  height: 220px;
+  height: 200px;
 }
 
 .chart-area > .medical-card .chart-container {
-  height: 200px;
+  height: 180px;
 }
 
 .card-area {

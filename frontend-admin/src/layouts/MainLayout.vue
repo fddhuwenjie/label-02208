@@ -383,6 +383,7 @@ onMounted(async () => {
   padding: 0;
   background: var(--medical-bg);
   overflow: hidden;
+  height: calc(100vh - 60px);
 }
 
 /* 密码强度条 */

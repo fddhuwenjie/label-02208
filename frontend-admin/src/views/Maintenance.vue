@@ -284,11 +284,11 @@ const fetchStats = async () => {
       hasDeptData.value = true
       deptChart = echarts.init(deptChartRef.value)
       deptChart.setOption({
-        tooltip: { trigger: 'axis' },
-        legend: { data: ['已完成', '未完成'], bottom: 0 },
-        grid: { left: 60, right: 20, top: 20, bottom: 50 },
-        xAxis: { type: 'category', data: maintenanceStats.byDepartment.map(d => d.department || '未分配') },
-        yAxis: { type: 'value' },
+        tooltip: { trigger: 'axis', confine: true },
+        legend: { data: ['已完成', '未完成'], bottom: 0, textStyle: { fontSize: 11 } },
+        grid: { left: 50, right: 20, top: 10, bottom: 45 },
+        xAxis: { type: 'category', data: maintenanceStats.byDepartment.map(d => d.department || '未分配'), axisLabel: { fontSize: 11 } },
+        yAxis: { type: 'value', axisLabel: { fontSize: 11 } },
         series: [
           {
             name: '已完成',
@@ -314,16 +314,16 @@ const fetchStats = async () => {
     if (faultStats.byType?.length) {
       faultPieChart = echarts.init(faultPieRef.value)
       faultPieChart.setOption({
-        tooltip: { trigger: 'item' },
+        tooltip: { trigger: 'item', confine: true },
         series: [{
           type: 'pie',
-          radius: ['40%', '70%'],
+          radius: ['35%', '65%'],
           center: ['50%', '50%'],
           data: faultStats.byType.map(t => ({
             name: t.fault_type,
             value: t.count
           })),
-          label: { show: true, formatter: '{b}: {c}' },
+          label: { show: true, formatter: '{b}: {c}', fontSize: 11 },
           itemStyle: { borderRadius: 4 }
         }]
       })
@@ -503,7 +503,7 @@ onUnmounted(() => {
 }
 
 .chart-container {
-  height: 250px;
+  height: 220px;
 }
 
 .fault-section {
@@ -533,7 +533,7 @@ onUnmounted(() => {
 }
 
 .chart-mini {
-  height: 150px;
+  height: 130px;
 }
 
 .kanban-container {
