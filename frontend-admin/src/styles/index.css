@@ -1,0 +1,348 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --medical-primary: #0d9488;
+  --medical-primary-light: #14b8a6;
+  --medical-primary-dark: #0f766e;
+  --medical-success: #10b981;
+  --medical-warning: #f59e0b;
+  --medical-danger: #ef4444;
+  --medical-info: #3b82f6;
+  --medical-bg: #f0fdfa;
+  --medical-bg-dark: #e6f7f5;
+  --medical-text: #1e293b;
+  --medical-text-secondary: #64748b;
+  --medical-border: #e2e8f0;
+  --medical-card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+html, body, #app {
+  height: 100%;
+  width: 100%;
+  font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  background: var(--medical-bg);
+  color: var(--medical-text);
+}
+
+/* 滚动条样式 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--medical-bg-dark);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--medical-primary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--medical-primary-dark);
+}
+
+/* Element Plus 主题覆盖 */
+.el-button--primary {
+  --el-button-bg-color: var(--medical-primary);
+  --el-button-border-color: var(--medical-primary);
+  --el-button-hover-bg-color: var(--medical-primary-light);
+  --el-button-hover-border-color: var(--medical-primary-light);
+  --el-button-active-bg-color: var(--medical-primary-dark);
+  --el-button-active-border-color: var(--medical-primary-dark);
+}
+
+.el-menu--horizontal > .el-menu-item.is-active {
+  border-bottom-color: var(--medical-primary);
+  color: var(--medical-primary);
+}
+
+.el-menu-item.is-active {
+  color: var(--medical-primary);
+  background: var(--medical-bg);
+}
+
+.el-progress-bar__inner {
+  background-color: var(--medical-primary);
+}
+
+/* 卡片样式 */
+.medical-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: var(--medical-card-shadow);
+  padding: 20px;
+  transition: all 0.3s ease;
+}
+
+.medical-card:hover {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* 状态颜色 */
+.status-normal { color: var(--medical-success); }
+.status-warning { color: var(--medical-warning); }
+.status-danger { color: var(--medical-danger); }
+.status-info { color: var(--medical-info); }
+
+/* 图表容器 */
+.chart-container {
+  width: 100%;
+  height: 100%;
+  min-height: 300px;
+}
+
+/* 页面布局 */
+.page-container {
+  height: 100%;
+  padding: 20px;
+  overflow-y: auto;
+  background: var(--medical-bg);
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.page-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--medical-text);
+}
+
+/* 网格布局 */
+.grid-container {
+  display: grid;
+  gap: 20px;
+}
+
+.grid-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.grid-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.grid-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+@media (max-width: 1200px) {
+  .grid-4 { grid-template-columns: repeat(2, 1fr); }
+  .grid-3 { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 768px) {
+  .grid-4, .grid-3, .grid-2 { grid-template-columns: 1fr; }
+}
+
+/* 卡片流容器 */
+.card-flow {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding: 10px 0;
+}
+
+.card-flow::-webkit-scrollbar {
+  height: 6px;
+}
+
+/* 指标卡片 */
+.indicator-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: var(--medical-card-shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.indicator-card .value {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--medical-primary);
+}
+
+.indicator-card .label {
+  font-size: 14px;
+  color: var(--medical-text-secondary);
+}
+
+.indicator-card .trend {
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.indicator-card .trend.up { color: var(--medical-success); }
+.indicator-card .trend.down { color: var(--medical-danger); }
+
+/* 任务卡片 */
+.task-card {
+  background: white;
+  border-radius: 10px;
+  padding: 16px;
+  min-width: 280px;
+  box-shadow: var(--medical-card-shadow);
+  border-left: 4px solid var(--medical-primary);
+}
+
+.task-card.warning {
+  border-left-color: var(--medical-warning);
+}
+
+.task-card.danger {
+  border-left-color: var(--medical-danger);
+}
+
+.task-card .title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.task-card .info {
+  font-size: 13px;
+  color: var(--medical-text-secondary);
+  margin-bottom: 4px;
+}
+
+.task-card .actions {
+  margin-top: 12px;
+  display: flex;
+  gap: 8px;
+}
+
+/* 进度条样式 */
+.progress-section {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: var(--medical-card-shadow);
+}
+
+.progress-item {
+  margin-bottom: 20px;
+}
+
+.progress-item:last-child {
+  margin-bottom: 0;
+}
+
+.progress-label {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+/* 日历样式 */
+.calendar-container {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: var(--medical-card-shadow);
+}
+
+/* 看板样式 */
+.kanban-container {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  padding: 10px 0;
+}
+
+.kanban-column {
+  min-width: 300px;
+  background: var(--medical-bg-dark);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.kanban-column .column-header {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.kanban-column .column-header .count {
+  background: var(--medical-primary);
+  color: white;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+}
+
+.kanban-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+/* 登录页样式 */
+.login-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--medical-primary) 0%, var(--medical-primary-dark) 100%);
+}
+
+.login-box {
+  background: white;
+  border-radius: 16px;
+  padding: 40px;
+  width: 400px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.login-logo {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.login-logo .icon {
+  width: 80px;
+  height: 80px;
+  background: var(--medical-primary);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+}
+
+.login-logo .icon svg {
+  width: 48px;
+  height: 48px;
+  color: white;
+}
+
+.login-logo h1 {
+  font-size: 24px;
+  color: var(--medical-text);
+}
+
+.login-logo p {
+  font-size: 14px;
+  color: var(--medical-text-secondary);
+  margin-top: 8px;
+}
