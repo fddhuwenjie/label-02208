@@ -539,6 +539,8 @@ onMounted(() => {
   fetchLifecycleStats()
   fetchCustomStats()
   window.addEventListener('resize', handleResize)
+  // 图表初始化后延迟resize
+  setTimeout(handleResize, 200)
 })
 
 onUnmounted(() => {

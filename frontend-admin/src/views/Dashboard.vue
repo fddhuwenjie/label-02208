@@ -428,12 +428,17 @@ const fetchTodos = async () => {
 }
 
 /** 刷新所有数据 */
-const refreshData = () => {
-  fetchIndicators()
-  fetchStatusDistribution()
-  fetchTypeDeptDistribution()
-  fetchMaintenanceProgress()
-  fetchTodos()
+const refreshData = async () => {
+  await fetchIndicators()
+  await fetchStatusDistribution()
+  await fetchTypeDeptDistribution()
+  await fetchMaintenanceProgress()
+  await fetchTodos()
+  // 图表初始化后延迟resize确保正确渲染
+  setTimeout(() => {
+    statusChart?.resize()
+    typeDeptChart?.resize()
+  }, 100)
 }
 
 // ==================== 生命周期 ====================

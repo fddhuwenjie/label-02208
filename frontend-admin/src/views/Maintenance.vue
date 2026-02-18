@@ -429,6 +429,7 @@ onMounted(() => {
   fetchFaults()
   fetchStats()
   window.addEventListener('resize', handleResize)
+  setTimeout(handleResize, 200)
 })
 
 onUnmounted(() => {

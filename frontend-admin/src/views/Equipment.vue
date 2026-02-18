@@ -806,6 +806,7 @@ onMounted(() => {
   fetchOptions()
   fetchChartData()
   window.addEventListener('resize', handleResize)
+  setTimeout(handleResize, 200)
 })
 
 onUnmounted(() => {
