@@ -246,6 +246,29 @@
         <el-descriptions-item label="存放位置" :span="2">{{ currentRow.location }}</el-descriptions-item>
         <el-descriptions-item label="描述" :span="2">{{ currentRow.description || '-' }}</el-descriptions-item>
       </el-descriptions>
+      <template #footer>
+        <el-button @click="detailVisible = false">关闭</el-button>
+        <el-button type="primary" @click="handleGenerateQRCode">生成二维码</el-button>
+      </template>
+    </el-dialog>
+
+    <!-- 二维码弹窗 -->
+    <el-dialog v-model="qrCodeDialogVisible" title="设备二维码标签" width="400px" @opened="handleDialogOpened">
+      <div class="qrcode-container">
+        <div class="qrcode-info">
+          <p><strong>设备编号：</strong>{{ qrCodeData.code || '-' }}</p>
+          <p><strong>设备名称：</strong>{{ qrCodeData.name || '-' }}</p>
+          <p><strong>所属科室：</strong>{{ qrCodeData.department || '-' }}</p>
+          <p><strong>责任人：</strong>{{ qrCodeData.responsible_person || '-' }}</p>
+        </div>
+        <div class="qrcode-image" ref="qrcodeImageRef" v-loading="qrCodeLoading">
+          <canvas v-show="!qrCodeLoading" ref="qrcodeCanvasRef"></canvas>
+        </div>
+      </div>
+      <template #footer>
+        <el-button @click="qrCodeDialogVisible = false">关闭</el-button>
+        <el-button type="primary" @click="handleDownloadQRCode" :disabled="qrCodeLoading">下载PNG</el-button>
+      </template>
     </el-dialog>
 
     <!-- 批量操作对话框 -->
@@ -346,10 +369,11 @@
  * 4. 批量导入功能（CSV解析）
  * 5. 图表展示（完整率、年限分布）
  */
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import * as echarts from 'echarts'
+import QRCode from 'qrcode'
 import api from '../utils/api'
 
 // ==================== 路由 ====================
@@ -420,6 +444,13 @@ const importData = ref([])
 const maintenanceDialogVisible = ref(false)
 const maintenanceRecords = ref([])
 const maintenanceLoading = ref(false)
+
+/** 二维码弹窗 */
+const qrCodeDialogVisible = ref(false)
+const qrCodeData = ref({})
+const qrcodeImageRef = ref(null)
+const qrcodeCanvasRef = ref(null)
+const qrCodeLoading = ref(false)
 
 // ==================== 图表引用 ====================
 
@@ -863,6 +894,102 @@ const handleImport = async () => {
   fetchList()
 }
 
+// ==================== 二维码功能 ====================
+
+/**
+ * 生成设备二维码
+ */
+const handleGenerateQRCode = async () => {
+  qrCodeLoading.value = true
+  try {
+    const data = await api.get(`/equipment/${currentRow.value.id}/qrcode`)
+    
+    qrCodeData.value = {
+      code: data.code || '-',
+      name: data.name || '-',
+      department: data.department || '-',
+      responsible_person: data.responsible_person || '-',
+      detail_url: `${window.location.origin}/equipment/${currentRow.value.id}`
+    }
+    
+    qrCodeDialogVisible.value = true
+  } catch (e) {
+    ElMessage.error('生成二维码失败')
+    qrCodeLoading.value = false
+  }
+}
+
+/**
+ * 对话框打开后渲染二维码
+ */
+const handleDialogOpened = async () => {
+  await nextTick()
+  
+  if (!qrcodeCanvasRef.value || !qrCodeData.value.detail_url) {
+    qrCodeLoading.value = false
+    return
+  }
+  
+  try {
+    await QRCode.toCanvas(qrcodeCanvasRef.value, qrCodeData.value.detail_url, {
+      width: 200,
+      margin: 2,
+      color: {
+        dark: '#000000',
+        light: '#ffffff'
+      }
+    })
+  } catch (e) {
+    ElMessage.error('二维码渲染失败')
+  } finally {
+    qrCodeLoading.value = false
+  }
+}
+
+/**
+ * 下载二维码为PNG图片（包含设备信息文字）
+ */
+const handleDownloadQRCode = () => {
+  if (!qrcodeCanvasRef.value) return
+  
+  const originalCanvas = qrcodeCanvasRef.value
+  const labelCanvas = document.createElement('canvas')
+  const ctx = labelCanvas.getContext('2d')
+  
+  const qrSize = 200
+  const padding = 20
+  const textHeight = 80
+  const totalWidth = qrSize + padding * 2
+  const totalHeight = qrSize + textHeight + padding * 3
+  
+  labelCanvas.width = totalWidth
+  labelCanvas.height = totalHeight
+  
+  ctx.fillStyle = '#ffffff'
+  ctx.fillRect(0, 0, totalWidth, totalHeight)
+  
+  ctx.drawImage(originalCanvas, padding, padding, qrSize, qrSize)
+  
+  ctx.fillStyle = '#000000'
+  ctx.font = 'bold 14px sans-serif'
+  ctx.textAlign = 'center'
+  
+  const textStartY = qrSize + padding * 2
+  const lineHeight = 20
+  
+  ctx.fillText(`设备编号: ${qrCodeData.value.code}`, totalWidth / 2, textStartY)
+  ctx.fillText(`设备名称: ${qrCodeData.value.name}`, totalWidth / 2, textStartY + lineHeight)
+  ctx.fillText(`科室: ${qrCodeData.value.department}`, totalWidth / 2, textStartY + lineHeight * 2)
+  ctx.fillText(`责任人: ${qrCodeData.value.responsible_person}`, totalWidth / 2, textStartY + lineHeight * 3)
+  
+  const link = document.createElement('a')
+  link.download = `${qrCodeData.value.code}_设备标签.png`
+  link.href = labelCanvas.toDataURL('image/png')
+  link.click()
+  
+  ElMessage.success('二维码标签下载成功')
+}
+
 // ==================== 生命周期 ====================
 
 /** 窗口大小变化时重绘图表 */
@@ -1019,5 +1146,41 @@ onUnmounted(() => {
 .header-actions {
   display: flex;
   gap: 12px;
+}
+
+/* 二维码容器样式 */
+.qrcode-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 0;
+}
+
+.qrcode-info {
+  width: 100%;
+  margin-bottom: 20px;
+  padding: 16px;
+  background: var(--medical-bg);
+  border-radius: 8px;
+}
+
+.qrcode-info p {
+  margin: 8px 0;
+  font-size: 14px;
+  color: var(--medical-text);
+}
+
+.qrcode-image {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 16px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+}
+
+.qrcode-image canvas {
+  display: block;
 }
 </style>

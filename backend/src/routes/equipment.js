@@ -390,4 +390,32 @@ router.get('/options/types', authenticateToken, (req, res) => {
   }
 });
 
+// ==================== 二维码标签接口 ====================
+
+/**
+ * GET /equipment/:id/qrcode
+ * 获取设备二维码信息
+ * 返回设备编号、名称、科室、责任人信息
+ * 
+ * @param {string} id - 设备ID
+ */
+router.get('/:id/qrcode', authenticateToken, (req, res) => {
+  try {
+    const equipment = queryOne('SELECT code, name, department, responsible_person FROM equipment WHERE id = ?', [req.params.id]);
+    if (!equipment) {
+      return res.status(404).json({ message: '设备不存在' });
+    }
+    
+    res.json({
+      code: equipment.code,
+      name: equipment.name,
+      department: equipment.department,
+      responsible_person: equipment.responsible_person
+    });
+  } catch (error) {
+    logger.error('Equipment', 'GetQRCode', error, { id: req.params.id });
+    res.status(500).json({ message: '服务器错误' });
+  }
+});
+
 module.exports = router;
