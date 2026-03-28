@@ -246,6 +246,27 @@
         <el-descriptions-item label="存放位置" :span="2">{{ currentRow.location }}</el-descriptions-item>
         <el-descriptions-item label="描述" :span="2">{{ currentRow.description || '-' }}</el-descriptions-item>
       </el-descriptions>
+      <template #footer>
+        <el-button @click="detailVisible = false">关闭</el-button>
+        <el-button type="primary" @click="showQrCodeDialog">生成二维码</el-button>
+      </template>
+    </el-dialog>
+    
+    <!-- 二维码对话框 -->
+    <el-dialog v-model="qrCodeDialogVisible" title="设备二维码" width="450px">
+      <div class="qrcode-container">
+        <div class="qrcode-info">
+          <p><strong>设备编号：</strong>{{ qrCodeInfo.code }}</p>
+          <p><strong>设备名称：</strong>{{ qrCodeInfo.name }}</p>
+          <p><strong>所属科室：</strong>{{ qrCodeInfo.department }}</p>
+          <p><strong>责任人：</strong>{{ qrCodeInfo.responsible_person }}</p>
+        </div>
+        <div class="qrcode-image" ref="qrcodeImageRef"></div>
+      </div>
+      <template #footer>
+        <el-button @click="qrCodeDialogVisible = false">关闭</el-button>
+        <el-button type="primary" @click="downloadQrCode">下载二维码</el-button>
+      </template>
     </el-dialog>
 
     <!-- 批量操作对话框 -->
@@ -351,6 +372,7 @@ import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import * as echarts from 'echarts'
 import api from '../utils/api'
+import QRCode from 'qrcode'
 
 // ==================== 路由 ====================
 const router = useRouter()
@@ -420,6 +442,11 @@ const importData = ref([])
 const maintenanceDialogVisible = ref(false)
 const maintenanceRecords = ref([])
 const maintenanceLoading = ref(false)
+
+/** 二维码对话框 */
+const qrCodeDialogVisible = ref(false)
+const qrCodeInfo = ref({})
+const qrcodeImageRef = ref(null)
 
 // ==================== 图表引用 ====================
 
@@ -863,6 +890,76 @@ const handleImport = async () => {
   fetchList()
 }
 
+// ==================== 二维码相关 ====================
+
+/**
+ * 显示二维码对话框
+ */
+const showQrCodeDialog = async () => {
+  try {
+    const data = await api.get(`/equipment/${currentRow.value.id}/qrcode`)
+    qrCodeInfo.value = data
+    qrCodeDialogVisible.value = true
+    
+    // 对话框打开后生成二维码
+    setTimeout(() => {
+      generateQrCode()
+    }, 100)
+  } catch (e) {
+    ElMessage.error('获取二维码信息失败')
+  }
+}
+
+/**
+ * 生成二维码
+ */
+const generateQrCode = () => {
+  if (!qrcodeImageRef.value || !qrCodeInfo.value.detailUrl) return
+  
+  // 清空容器
+  qrcodeImageRef.value.innerHTML = ''
+  
+  // 创建canvas元素
+  const canvas = document.createElement('canvas')
+  qrcodeImageRef.value.appendChild(canvas)
+  
+  // 生成二维码
+  QRCode.toCanvas(canvas, qrCodeInfo.value.detailUrl, {
+    width: 256,
+    margin: 2,
+    color: {
+      dark: '#000000',
+      light: '#ffffff'
+    }
+  }, function (error) {
+    if (error) {
+      console.error(error)
+      ElMessage.error('二维码生成失败')
+    }
+  })
+}
+
+/**
+ * 下载二维码图片
+ */
+const downloadQrCode = () => {
+  if (!qrcodeImageRef.value) return
+  
+  const canvas = qrcodeImageRef.value.querySelector('canvas')
+  if (!canvas) {
+    ElMessage.error('二维码图片不存在')
+    return
+  }
+  
+  // 创建下载链接
+  const link = document.createElement('a')
+  link.download = `${qrCodeInfo.value.code}-二维码.png`
+  link.href = canvas.toDataURL('image/png')
+  link.click()
+  
+  ElMessage.success('二维码下载成功')
+}
+
 // ==================== 生命周期 ====================
 
 /** 窗口大小变化时重绘图表 */
@@ -1019,5 +1116,33 @@ onUnmounted(() => {
 .header-actions {
   display: flex;
   gap: 12px;
+}
+
+/* 二维码样式 */
+.qrcode-container {
+  text-align: center;
+  padding: 20px;
+}
+
+.qrcode-info {
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.qrcode-info p {
+  margin: 8px 0;
+}
+
+.qrcode-image {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.qrcode-image canvas {
+  max-width: 100%;
+  border: 1px solid #eee;
+  padding: 10px;
+  border-radius: 8px;
 }
 </style>
